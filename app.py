@@ -3,8 +3,12 @@ from discord.ext import commands, tasks
 from discord.utils import get
 from discord.utils import find
 import qrcode, os, datetime, json, time, requests, random
+from itertools import cycle
+from discord.ext.commands import has_permissions
+
 
 prefixes = {}
+status = cycle(['Oi Josuke! help','Oi Josuke! help','Support: discord.gg/vuYseDR'])
 
 def get_prefix(client, message):
     with open('prefixes.json', 'r') as f:
@@ -14,6 +18,7 @@ def get_prefix(client, message):
 
 client = commands.Bot(command_prefix = get_prefix, case_insensitive=True)
 client.remove_command('help')
+
 
 first_time = datetime.datetime.now()
 
@@ -27,8 +32,8 @@ async def on_guild_join(guild):
     general = find(lambda x: x.name == 'general',  guild.text_channels)
     if general and general.permissions_for(guild.me).send_messages:
         hello = discord.Embed(
-            title = f'Oi {guild.name}!',
-            description = 'Please use Oi Josuke! help for a list of commands.',
+            title = f'Oi `{guild.name}`!',
+            description = 'Please use `Oi Josuke! help` for a list of commands.',
             colour = discord.Colour.blue()
         )
         
@@ -46,27 +51,22 @@ async def on_guild_remove(guild):
     with open('prefixes.json', 'w') as f:
         json.dump(prefixes, f, indent=4)
 
-
-
 @client.command()
+@has_permissions(administrator=True)
 async def prefix(ctx, * , prefix):
-    if ctx.message.author.guild_permissions.administrator:
-        if isinstance(prefix, commands.MissingRequiredArgument):
-            await ctx.send('Please specify a prefix.')
-        if prefix[-2:] == '>>':
-            prefix = prefix[:-2]
-            prefix += ' '
-        with open('prefixes.json', 'r') as f:
-            prefixes = json.load(f)
-        prefixes[str(ctx.guild.id)] = prefix
-        await client.change_presence(status=discord.Status.online, activity=discord.Game(f'Oi Josuke! help'))
-        with open('prefixes.json', 'w') as f:
-            json.dump(prefixes, f, indent=4)
-        await ctx.send(f'I used Za Hando to update the prefix! `{prefix}`.')
-    else:
-        await ctx.send('Sorry, it seems you don\'t have sufficient privileges to execute this command.')
+    if prefix[-2:] == '>>':
+        prefix = prefix[:-2]
+        prefix += ' '
+    with open('prefixes.json', 'r') as f:
+        prefixes = json.load(f)
+    prefixes[str(ctx.guild.id)] = prefix
+    with open('prefixes.json', 'w') as f:
+        json.dump(prefixes, f, indent=4)
+    embed = discord.Embed(title="I used Za Hando to update the prefix!",description=f"New prefix: `{prefix}`.",color=discord.Color.green())
+    embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
+    embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')    
+    await ctx.send(embed=embed)
   
-
 @client.command()
 async def fun(ctx):
     await ctx.send('Did you mean `help fun`?')
@@ -93,10 +93,15 @@ async def admin(ctx):
 
 @client.event
 async def on_ready():
+    change_status.start()
     await client.change_presence(status=discord.Status.online, activity=discord.Game('Oi Josuke! help'))
     first_time = datetime.datetime.now()
     print('Bot ready.')  
 
+@tasks.loop(seconds=6)
+async def change_status():
+    await client.change_presence(status=discord.Status.online, activity=discord.Game(next(status)))
+    
 @client.event
 async def on_command_error(ctx, error):
     # if command has local error handler, return
@@ -111,21 +116,29 @@ async def on_command_error(ctx, error):
 
     if isinstance(error, commands.MissingRequiredArgument):
         embed = discord.Embed(title="Oi Josuke!",description="You didn't seem to pass in all the required arguments for this command.",color=discord.Color.red())
+        embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
+        embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
         await ctx.send(embed=embed)
         return
 
     if isinstance(error, commands.CommandOnCooldown):
         embed = discord.Embed(title="This command is on cooldown", description=f'Please try again in `{error.retry_after:,.1f}` seconds.', color=discord.Color.red())
+        embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
+        embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
         await ctx.send(embed=embed)
         return
 
     if isinstance(error, commands.TooManyArguments):
         embed = discord.Embed(title="Stop wasting Za Hando's time!",description="You specified too many things!!",color=discord.Color.red())
+        embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
+        embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
         await ctx.send(embed=embed)
         return
 
     if isinstance(error, commands.MissingPermissions):
         embed = discord.Embed(title="nani the fuck",description='Looks like you don\'t have permissions to do that! :think:',color=discord.Color.red())
+        embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
+        embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
         await ctx.send(embed=embed)
         return
 
@@ -139,6 +152,8 @@ async def on_command_error(ctx, error):
             await ctx.send(f"I don't seem to have the {fmt} permissions to do this!")
         else:
             embed = discord.Embed(title="You restrain Za Hando's power, why?",description=f"I don't seem to have the {fmt} permissions to do this!",color=discord.Color.red())
+            embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
+            embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
             await ctx.send(embed=embed)
         return
 
@@ -159,11 +174,11 @@ for filename in os.listdir('./cogs'):
 async def help(ctx, args=''):
     author = ctx.message.author.mention
     
-    if args == 'sound':
+    if args.lower() == 'sound':
         sound = discord.Embed(
             title = 'Sound Help',
-            description = 'Here\'s a list of sound-related commands.',
-            colour = discord.Colour.blue()
+            description = 'These commands have been disabled for the forseeable future.',
+            colour = discord.Colour.red()
         
         )
         
@@ -178,7 +193,7 @@ async def help(ctx, args=''):
         
         await ctx.send(author, embed=sound)
 
-    elif args == 'util':
+    elif args.lower() == 'util':
         util = discord.Embed(
             title = 'Utility Help',
             description = 'Here\'s a list of useful commands.',
@@ -192,9 +207,10 @@ async def help(ctx, args=''):
         util.add_field(name='`qr <Data>`', value='Returns QR Code with specified data.', inline=False) 
         util.add_field(name='`say <Message>`', value='Returns specified message.', inline=False)
         util.add_field(name='`reddit <Subreddit>`', value='Returns random post from specified subreddit.', inline=False)  
-        util.add_field(name='`anime <Anime>`', value='Returns information on requested anime.', inline=False)  
+        util.add_field(name='`anime <Anime>`', value='Returns information on requested anime.', inline=False)
+        util.add_field(name='`gif <Gif>`', value='Returns gif based on query.', inline=False) 
         await ctx.send(author, embed=util)   
-    elif args == 'config':
+    elif args.lower() == 'config':
             config = discord.Embed(
                 title = 'Configuration Help',
                 description = 'Here\'s a list of settings.',
@@ -209,7 +225,7 @@ async def help(ctx, args=''):
             config.add_field(name='`info`', value='Returns information on this bot.', inline=False) 
             
             await ctx.send(author, embed=config)       
-    elif args == 'fun':
+    elif args.lower() == 'fun':
         fun = discord.Embed(
             title = 'Fun Help',
             description = 'Here\'s a list of fun commands.',
@@ -227,7 +243,7 @@ async def help(ctx, args=''):
         fun.add_field(name='`truth`', value='Returns THE TRUTH.', inline=False) 
         fun.add_field(name='`character`', value='Returns a random JoJo character.', inline=False) 
         await ctx.send(author, embed=fun)
-    elif args == 'admin':
+    elif args.lower() == 'admin':
         fun = discord.Embed(
             title = 'Admin Help',
             description = 'Here\'s a list of admin commands. **If you invited this bot before 31/08/2020, you will need to enable Administrator privileges to use these commands.**',
@@ -253,11 +269,11 @@ async def help(ctx, args=''):
         embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
         
         embed.add_field(name='`help fun`', value='Returns help for fun and jojo commands.', inline=True)
-        embed.add_field(name='`help sound`', value='Returns help for sound related commands.', inline=True)  
+        embed.add_field(name='~~`help sound`~~', value='Sound commands have been disabled.', inline=True)  
         embed.add_field(name='`help util`', value='Returns information for useful commands.', inline=True)
         embed.add_field(name='`help config`', value='Returns help for configuration commands.', inline=True)
         embed.add_field(name='`help admin`', value='Returns help for administrator commands.', inline=True)        
-        embed.add_field(name='Latest commands:',value='`slowmode`', inline=False)
+        embed.add_field(name='Latest commands:',value='`slowmode`,`gif`', inline=False)
         await ctx.send(author, embed=embed)
         
-client.run(TOKEN)
+client.run('bruh')
