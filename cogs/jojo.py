@@ -110,7 +110,7 @@ class JoJo(commands.Cog):
     async def quote(self,ctx):
         embed = discord.Embed(
             title = "Random JoJo\'s quote (spoilers)",
-            description="|| "+random.choice(wikiquote.quotes('JoJo\'s Bizarre Adventure'))+" ||",
+            description=wikiquote.quotes('JoJo\'s Bizarre Adventure', max_quotes=1)[0],
             colour = discord.Colour.blue()
         )
         embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')

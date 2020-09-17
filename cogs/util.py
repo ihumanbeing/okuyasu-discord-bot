@@ -4,22 +4,10 @@ from discord.utils import get
 import os
 import asyncio
 import requests
-import giphy_client
-from giphy_client.rest import ApiException
 from googletrans import Translator
 import qrcode
 from jikanpy import Jikan
 jikan = Jikan()
-
-
-# create an instance of the API class
-api_instance = giphy_client.DefaultApi()
-api_key = 'S01bsQdyZov4iPBDByqu7z2AzHbW3Wqq' # str | Giphy API Key.
-limit = 1 # int | The maximum number of records to return. (optional) (default to 25)
-offset = 0 # int | An optional results offset. Defaults to 0. (optional) (default to 0)
-rating = 'g' # str | Filters results by specified rating. (optional)
-lang = 'en' # str | Specify default country for regional content; use a 2-letter ISO 639-1 country code. See list of supported languages <a href = \"../language-support\">here</a>. (optional)
-fmt = 'json' # str | Used to indicate the expected response format. Default is Json. (optional) (default to json)
 
 
 class Util(commands.Cog):
@@ -32,19 +20,20 @@ class Util(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Util cog ready.')
+
     @commands.command(pass_context=True)
     @commands.cooldown(1,5,commands.BucketType.user)
     async def reddit(self, ctx, arg=""):
         if arg == "":
             url = 'https://meme-api.herokuapp.com/gimme/specifyasubreddit'
         else:
-            url = f'https://meme-api.herokuapp.com/gimme/{arg.lower()}'
+            url = f'https://meme-api.herokuapp.com/gimme/{arg}'
         response = requests.request("GET", url)
         response_json  = response.json()
-        if response_json["nsfw"] == True and not ctx.channel.is_nsfw():
+        if response_json["nsfw"] == True:
             embed = discord.Embed(
                 title = "Sorry!",
-                description = "NSFW posts are disabled in this channel.",
+                description = "NSFW posts are disabled.",
                 colour = discord.Colour.red()
             )
             embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
@@ -52,7 +41,7 @@ class Util(commands.Cog):
         
             await ctx.send(embed=embed)
         else:
-            if str(response_json["subreddit"]).lower() == "hentai": 
+            if str(response_json["subreddit"]) == "hentai": 
                 response_json["subreddit"] += " ( ͡° ͜ʖ ͡°)"
             embed = discord.Embed(
                 title = response_json["title"],
@@ -112,24 +101,6 @@ class Util(commands.Cog):
             pass
         else:
             await ctx.send(query)
-    @commands.command(pass_context=True)
-    @commands.cooldown(1, 7, commands.BucketType.user)
-    async def gif(self,ctx, args):
-        try: 
-            # Search Endpoint
-            api_response = api_instance.gifs_search_get(api_key, args, limit=limit, offset=offset, rating=rating, lang=lang, fmt=fmt)
-            api_response = api_response.data[0]
-            await ctx.send(api_response.embed_url)
-        except IndexError:
-            embed = discord.Embed(
-                title = "Oi Josuke!",
-                description="Za Hando couldn't find a gif matching your query, please try again!",
-                colour = discord.Colour.red()
-            )
-            embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
-            await ctx.send(embed=embed)
-        except ApiException as e:
-            print("Exception when calling DefaultApi->gifs_search_get: %s\n" % e)
     @commands.command(pass_context = True)
     @commands.cooldown(1,7,commands.BucketType.user)
     async def anime(self, ctx, *, args):

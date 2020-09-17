@@ -37,29 +37,28 @@ class Admin(commands.Cog):
             ctx.guild.default_role: discord.PermissionOverwrite(send_messages=False)
             }
             await channel.edit(overwrites=overwrites)
-            embed = discord.Embed(title="**ZA WARUDO! TIME HAS STOPPED!** :lock:", description=f"{ctx.message.author.mention} has stopped time in `{channel.name}`, with the help of my stand, Za Warudo! (hold up)", color=discord.Color.red())
+            embed = discord.Embed(title="Channel closed :lock:", description=f"{ctx.message.author.mention} has closed `{channel.name}`, with the help of Za Hando, of course.", color=discord.Color.red())
             embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
             embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
-            embed.set_image(url='https://tenor.com/view/za-warudo-jojo-bizarre-adventure-power-gif-14292027')
+        
             await ctx.send(embed=embed)
         elif channel.overwrites[ctx.guild.default_role].send_messages == True or channel.overwrites[ctx.guild.default_role].send_messages == None:
             overwrites = channel.overwrites[ctx.guild.default_role]
             overwrites.send_messages = False
             await channel.set_permissions(ctx.guild.default_role, overwrite=overwrites)
-            embed = discord.Embed(title="**ZA WARUDO! TIME HAS STOPPED!** :lock:", description=f"{ctx.message.author.mention} has stopped time in `{channel.name}`, with the help of my stand, Za Warudo! (hold up)", color=discord.Color.red())
+            embed = discord.Embed(title="Channel closed :lock:", description=f"{ctx.message.author.mention} has closed `{channel.name}`, with the help of Za Hando, of course.", color=discord.Color.red())
             embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
             embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
-            embed.set_image(url='https://tenor.com/view/za-warudo-jojo-bizarre-adventure-power-gif-14292027')
+        
             await ctx.send(embed=embed)
         else:
             overwrites = channel.overwrites[ctx.guild.default_role]
             overwrites.send_messages = True
             await channel.set_permissions(ctx.guild.default_role, overwrite=overwrites)
-            embed = discord.Embed(title="And time will move once more. :unlock:", description=f"{ctx.message.author.mention} has resumed time in `{channel.name}`, with the help of my stand, Za Warudo! (hold up)", color=discord.Color.green())
+            embed = discord.Embed(title="Channel opened :unlock:", description=f"{ctx.message.author.mention} has opened `{channel.name}`, with the help of Za Hando, of course.", color=discord.Color.green())
             embed.set_author(name='Okuyasu', icon_url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
             embed.set_thumbnail(url='https://cdn.discordapp.com/app-icons/720731150254866553/94ff5f04cc3a5bbe36e70d63a44980a6.png?size=256')
-            embed.set_image(url='https://tenor.com/view/za-warudo-jojo-bizarre-adventure-power-gif-14292027')
-    
+        
             await ctx.send(embed=embed)
             
     @commands.command()
